@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode - but we'll use dark by default */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 25 95% 53%; /* Cloudflare Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 25 95% 53%; /* Cloudflare Orange */
+    --chart-1: 25 95% 53%;
+    --chart-2: 45 93% 47%;
+    --chart-3: 15 95% 60%;
+    --chart-4: 35 95% 50%;
+    --chart-5: 20 95% 55%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark mode - Cloudflare inspired dark theme */
+    --background: 220 26% 8%; /* Very dark blue-gray */
+    --foreground: 210 40% 98%;
+    --card: 220 26% 10%; /* Dark card background */
+    --card-foreground: 210 40% 98%;
+    --popover: 220 26% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 25 95% 53%; /* Cloudflare Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 26% 15%; /* Darker secondary */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 26% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 220 26% 15%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 26% 15%;
+    --input: 220 26% 15%;
+    --ring: 25 95% 53%; /* Cloudflare Orange */
+    --chart-1: 25 95% 53%;
+    --chart-2: 45 93% 47%;
+    --chart-3: 15 95% 60%;
+    --chart-4: 35 95% 50%;
+    --chart-5: 20 95% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: Inter, system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Clean, minimal scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary)); /* Orange on hover */
+  }
+}
+
+@layer components {
+  .code-block {
+    @apply bg-muted border border-border rounded-md p-4 font-mono text-sm overflow-x-auto;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .code-inline {
+    @apply bg-muted text-foreground px-2 py-1 rounded text-sm font-mono;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* Cloudflare-style severity indicators */
+  .severity-critical {
+    @apply bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2 py-1 rounded text-xs font-medium;
+  }
+
+  .severity-high {
+    @apply bg-orange-400/10 text-orange-300 border border-orange-400/20 px-2 py-1 rounded text-xs font-medium;
+  }
+
+  .severity-medium {
+    @apply bg-orange-300/10 text-orange-200 border border-orange-300/20 px-2 py-1 rounded text-xs font-medium;
+  }
+
+  .severity-low {
+    @apply bg-orange-200/10 text-orange-100 border border-orange-200/20 px-2 py-1 rounded text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  .loading-dots {
+    @apply flex space-x-1;
+  }
+
+  .loading-dot {
+    @apply w-1.5 h-1.5 bg-primary rounded-full animate-pulse;
+  }
+
+  .loading-dot:nth-child(1) { animation-delay: 0s; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+}
