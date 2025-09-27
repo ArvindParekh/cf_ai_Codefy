@@ -19,3 +19,7 @@ This document lists the AI prompts and interactions used during the development 
 **Prompt:** "Review this React component for potential performance optimizations. It's a chat message component that renders dynamically."
 
 **Response Summary:** Recommended using React.memo for preventing unnecessary re-renders, suggested optimizing the message rendering logic, and proposed adding proper key props for list items.
+
+---
+
+Note: While I didn't maintain a detailed record of every AI interaction, the examples above represent the types of assistance I received throughout development. I primarily used AI for code refactoring, debugging TypeScript issues, implementing UI components, and writing documentation. 
