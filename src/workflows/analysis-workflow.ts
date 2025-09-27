@@ -26,7 +26,6 @@ export interface AnalysisWorkflowOutput {
 
 /**
  * Cloudflare Workflow for complex code analysis tasks
- * Handles multi-step analysis with retry logic and state persistence
  */
 export class AnalysisWorkflow extends Workflow {
   async run(input: AnalysisWorkflowInput): Promise<AnalysisWorkflowOutput> {
@@ -34,19 +33,14 @@ export class AnalysisWorkflow extends Workflow {
     const startTime = Date.now();
 
     try {
-      // Step 1: Initialize analysis session
       await this.initializeAnalysisSession(input.sessionId, analysisId);
 
-      // Step 2: Perform parallel analysis based on requested types
       const analysisResults = await this.performParallelAnalysis(input);
 
-      // Step 3: Aggregate and summarize results
       const summary = await this.generateSummary(analysisResults);
 
-      // Step 4: Store results in persistent state
       await this.storeAnalysisResults(input.sessionId, analysisId, analysisResults, summary);
 
-      // Step 5: Send notifications (if configured)
       await this.sendNotifications(input, analysisResults, summary);
 
       return {
@@ -69,17 +63,14 @@ export class AnalysisWorkflow extends Workflow {
 
   private async initializeAnalysisSession(sessionId: string, analysisId: string): Promise<void> {
     console.log(`Initializing analysis session: ${sessionId}, analysis: ${analysisId}`);
-    
-    // This would typically update a database or Durable Object
-    // For now, we'll just log the initialization
-    await new Promise(resolve => setTimeout(resolve, 100)); // Simulate async operation
+
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   private async performParallelAnalysis(input: AnalysisWorkflowInput): Promise<any> {
     const { code, analysisTypes } = input;
     const results: any = {};
 
-    // Create analysis tasks based on requested types
     const tasks: Promise<any>[] = [];
 
     if (analysisTypes.includes('security')) {
@@ -94,7 +85,6 @@ export class AnalysisWorkflow extends Workflow {
       tasks.push(this.analyzeQuality(code));
     }
 
-    // Execute all analysis tasks in parallel
     const analysisResults = await Promise.allSettled(tasks);
 
     // Process results
@@ -124,10 +114,9 @@ export class AnalysisWorkflow extends Workflow {
 
   private async analyzeSecurity(code: string): Promise<any> {
     console.log('Performing security analysis...');
-    
-    // Simulate security analysis
+
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     return {
       vulnerabilities: [
         {
@@ -145,10 +134,9 @@ export class AnalysisWorkflow extends Workflow {
 
   private async analyzePerformance(code: string): Promise<any> {
     console.log('Performing performance analysis...');
-    
-    // Simulate performance analysis
+
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     return {
       issues: [
         {
@@ -166,10 +154,9 @@ export class AnalysisWorkflow extends Workflow {
 
   private async analyzeQuality(code: string): Promise<any> {
     console.log('Performing quality analysis...');
-    
-    // Simulate quality analysis
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     return {
       issues: [
         {
@@ -187,12 +174,11 @@ export class AnalysisWorkflow extends Workflow {
 
   private async generateSummary(results: any): Promise<any> {
     console.log('Generating analysis summary...');
-    
+
     const allIssues: any[] = [];
     let totalScore = 0;
     let scoreCount = 0;
 
-    // Aggregate issues from all analysis types
     Object.values(results).forEach((result: any) => {
       if (result && !result.error) {
         if (result.vulnerabilities) allIssues.push(...result.vulnerabilities);
@@ -220,27 +206,23 @@ export class AnalysisWorkflow extends Workflow {
   }
 
   private async storeAnalysisResults(
-    sessionId: string, 
-    analysisId: string, 
-    results: any, 
+    sessionId: string,
+    analysisId: string,
+    results: any,
     summary: any
   ): Promise<void> {
     console.log(`Storing analysis results for session: ${sessionId}`);
-    
-    // This would typically store in a database or Durable Object
-    // For now, we'll simulate the storage operation
+
     await new Promise(resolve => setTimeout(resolve, 500));
   }
 
   private async sendNotifications(
-    input: AnalysisWorkflowInput, 
-    results: any, 
+    input: AnalysisWorkflowInput,
+    results: any,
     summary: any
   ): Promise<void> {
     console.log('Sending analysis notifications...');
-    
-    // This would send notifications via email, Slack, etc.
-    // For now, we'll just log the notification
+
     if (summary.criticalIssues > 0) {
       console.log(`⚠️ Critical issues found: ${summary.criticalIssues}`);
     }
@@ -248,8 +230,7 @@ export class AnalysisWorkflow extends Workflow {
 
   private async storeErrorState(sessionId: string, analysisId: string, error: Error): Promise<void> {
     console.error(`Storing error state for session: ${sessionId}, analysis: ${analysisId}`);
-    
-    // Store error information for debugging
+
     await new Promise(resolve => setTimeout(resolve, 200));
   }
 }

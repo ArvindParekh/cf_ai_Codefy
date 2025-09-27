@@ -50,9 +50,6 @@ export class CodeQualityAgent extends AIChatAgent<Env> {
     });
   }
 
-  /**
-   * Use Workers AI for code analysis (Llama 3.3)
-   */
   private async analyzeWithWorkersAI(code: string, analysisType: string): Promise<string> {
     const systemPrompt = `You are an expert code quality analyst. Analyze the following code for ${analysisType} and provide detailed feedback in a structured format.
 
@@ -73,7 +70,7 @@ Respond in a clear, structured format that a developer can easily understand and
           { role: "user", content: `Please analyze this code:\n\n${code}` }
         ],
         max_tokens: 2048,
-        temperature: 0.1, // Lower temperature for more consistent analysis
+        temperature: 0.1,
       });
 
       return (response as any).response || "Analysis completed but no response received.";
@@ -86,15 +83,12 @@ Respond in a clear, structured format that a developer can easily understand and
   async onChatMessage(onFinish: any) {
     return createTextStreamResponse({
       execute: async (dataStream) => {
-        // Check if this is a code analysis request
         const lastMessage = this.messages[this.messages.length - 1];
         const isCodeAnalysisRequest = this.isCodeAnalysisRequest(lastMessage.content);
 
         if (isCodeAnalysisRequest) {
-          // Perform detailed code analysis
           await this.performCodeAnalysis(lastMessage.content, dataStream, onFinish);
         } else {
-          // Regular chat interaction
           await this.performRegularChat(dataStream, onFinish);
         }
       },
@@ -117,24 +111,21 @@ Respond in a clear, structured format that a developer can easily understand and
 
   private async performCodeAnalysis(content: string, dataStream: any, onFinish: any) {
     try {
-      // Extract code from the content
       const codeMatch = content.match(/```[\s\S]*?```/);
       const code = codeMatch ? codeMatch[0].replace(/```[\w]*\n?/, '').replace(/```$/, '') : content;
 
-      // Perform parallel analysis using Workers AI
       const [securityAnalysis, performanceAnalysis, qualityAnalysis] = await Promise.all([
         this.analyzeWithWorkersAI(code, "security vulnerabilities and potential exploits"),
         this.analyzeWithWorkersAI(code, "performance issues and optimization opportunities"),
         this.analyzeWithWorkersAI(code, "code quality, maintainability, and best practices")
       ]);
 
-      // Combine the analyses into a comprehensive response
       const combinedAnalysis = `# 🔍 Code Quality Analysis Report
 
 ## 🛡️ Security Analysis
 ${securityAnalysis}
 
-## ⚡ Performance Analysis  
+## ⚡ Performance Analysis
 ${performanceAnalysis}
 
 ## 📋 Quality Analysis
@@ -145,7 +136,6 @@ Your code has been analyzed for security vulnerabilities, performance issues, an
 
 *Analysis powered by Cloudflare Workers AI (Llama 3.3)*`;
 
-      // Create a mock analysis result for storage
       const analysisResult: CodeAnalysisResult = {
         securityIssues: [{ severity: 'medium' as const, issue: 'Analysis completed', line: 1, suggestion: 'Review security recommendations above' }],
         performanceIssues: [{ severity: 'medium' as const, issue: 'Analysis completed', line: 1, suggestion: 'Review performance recommendations above' }],
@@ -154,14 +144,12 @@ Your code has been analyzed for security vulnerabilities, performance issues, an
         summary: 'Comprehensive code analysis completed using Workers AI'
       };
 
-      // Save the analysis result
       await this.saveAnalysisResult(analysisResult);
 
-      // Stream the response
       const chunks = combinedAnalysis.split('\n');
       for (const chunk of chunks) {
         dataStream.writeText(chunk + '\n');
-        await new Promise(resolve => setTimeout(resolve, 50)); // Small delay for streaming effect
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
 
       if (onFinish) {
@@ -221,8 +209,6 @@ Always be specific in your feedback and provide actionable suggestions.`;
   }
 
   private getSessionId(): string {
-    // In a real implementation, this would be derived from user authentication
-    // For now, use a default session
     return 'default-session';
   }
 
@@ -236,7 +222,7 @@ Always be specific in your feedback and provide actionable suggestions.`;
     try {
       const stateObject = await this.getStateObject();
       const sessionId = this.getSessionId();
-      
+
       const response = await stateObject.fetch(`http://localhost/analysis?sessionId=${sessionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -246,11 +232,8 @@ Always be specific in your feedback and provide actionable suggestions.`;
       if (!response.ok) {
         throw new Error(`Failed to save analysis: ${response.statusText}`);
       }
-      
-      console.log("Analysis result saved successfully");
     } catch (error) {
       console.error("Error saving analysis result:", error);
-      // Don't throw - continue execution even if storage fails
     }
   }
 
@@ -258,19 +241,18 @@ Always be specific in your feedback and provide actionable suggestions.`;
     try {
       const stateObject = await this.getStateObject();
       const sessionId = this.getSessionId();
-      
+
       const response = await stateObject.fetch(`http://localhost/analysis?sessionId=${sessionId}&limit=${limit}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to get analysis history: ${response.statusText}`);
       }
-      
+
       const history = await response.json() as CodeAnalysisResult[];
-      console.log(`Retrieved ${history.length} analysis results from history`);
       return history;
     } catch (error) {
       console.error("Error retrieving analysis history:", error);
-      return []; // Return empty array on error
+      return [];
     }
   }
 }

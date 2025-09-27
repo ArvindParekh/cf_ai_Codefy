@@ -1,8 +1,5 @@
 /**
- * AI Code Quality Assistant - Cloudflare Agents
- * 
- * An intelligent agent that analyzes code for security vulnerabilities,
- * performance issues, and quality problems through natural chat interaction.
+ * AI Code Quality Assistant - Cloudflare Workers API
  */
 
 import { QualityAnalysisState } from './durable-objects/quality-analysis-state';
@@ -57,34 +54,7 @@ Format your response clearly with specific issues, severity levels (low/medium/h
 		return (response as any).response || "Analysis completed but no response received.";
 	} catch (error) {
 		console.error("Code analysis error:", error);
-		return `🔧 **Analysis Service Temporarily Unavailable**
-
-I'm currently unable to connect to the AI analysis service. Here's what you can check manually:
-
-**Security Guidelines:**
-• Input validation and sanitization
-• SQL injection prevention (use parameterized queries)
-• XSS prevention (escape output)
-• Authentication and authorization
-• Data encryption for sensitive information
-
-**Performance Guidelines:**
-• Efficient algorithms and data structures
-• Database query optimization
-• Memory management and leak prevention
-• Caching strategies
-• Asynchronous operations for I/O
-
-**Quality Guidelines:**
-• Clear variable names and consistent formatting
-• Small, focused functions
-• Comprehensive error handling
-• Unit testing coverage
-• Code documentation
-
-**Error Details:** ${(error as Error).message}
-
-Please try again in a few moments or check your code against these guidelines.`;
+		return "Unable to analyze code at this time. Please try again later.";
 	}
 }
 
@@ -116,7 +86,7 @@ Be friendly, professional, and provide practical advice that improves code quali
 		return (response as any).response || "I'm here to help with your coding questions!";
 	} catch (error) {
 		console.error("General chat error:", error);
-		return "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.";
+		return "I'm having trouble processing your request. Please try again.";
 	}
 }
 
@@ -135,9 +105,6 @@ export default {
 			});
 		}
 
-		// Serve static HTML for the chat interface - handled by Cloudflare Workers assets
-		// The HTML file in public/index.html will be served automatically
-
 		// Handle agent connections and chat
 		if (url.pathname.startsWith('/agents/')) {
 			try {
@@ -145,10 +112,9 @@ export default {
 				const agentType = url.pathname.split('/')[2];
 				
 				if (agentType === 'simple-code-agent') {
-					// Handle chat requests directly without using the complex agent framework
 					if (request.method === 'POST') {
 						const body = await request.json() as { messages: Array<{ role: string; content: string }> };
-						
+
 						if (!body.messages || body.messages.length === 0) {
 							return new Response(JSON.stringify({ error: 'No messages provided' }), {
 								status: 400,
@@ -156,36 +122,31 @@ export default {
 							});
 						}
 
-						// Get the last user message
 						const lastMessage = body.messages[body.messages.length - 1];
-						
-						// Check if this is a code analysis request
 						const isCodeAnalysis = isCodeAnalysisRequest(lastMessage.content);
-						
+
 						if (isCodeAnalysis) {
-							// Perform code analysis using Workers AI
 							const analysisResult = await performCodeAnalysis(lastMessage.content, env);
-							return new Response(JSON.stringify({ 
-								choices: [{ 
-									delta: { content: analysisResult } 
-								}] 
+							return new Response(JSON.stringify({
+								choices: [{
+									delta: { content: analysisResult }
+								}]
 							}), {
-								headers: { 
-									'Content-Type': 'application/json', 
+								headers: {
+									'Content-Type': 'application/json',
 									'Access-Control-Allow-Origin': '*',
 									'Cache-Control': 'no-cache'
 								}
 							});
 						} else {
-							// Handle general chat
 							const chatResponse = await performGeneralChat(lastMessage.content, env);
-							return new Response(JSON.stringify({ 
-								choices: [{ 
-									delta: { content: chatResponse } 
-								}] 
+							return new Response(JSON.stringify({
+								choices: [{
+									delta: { content: chatResponse }
+								}]
 							}), {
-								headers: { 
-									'Content-Type': 'application/json', 
+								headers: {
+									'Content-Type': 'application/json',
 									'Access-Control-Allow-Origin': '*',
 									'Cache-Control': 'no-cache'
 								}
@@ -193,7 +154,7 @@ export default {
 						}
 					}
 				} else {
-					return new Response('Unknown agent type', { 
+					return new Response('Unknown agent type', {
 						status: 404,
 						headers: { 'Access-Control-Allow-Origin': '*' }
 					});
@@ -211,7 +172,7 @@ export default {
 		if (url.pathname === '/api/analyze' && request.method === 'POST') {
 			try {
 				const { code, language } = await request.json() as { code: string; language?: string };
-				
+
 				if (!code) {
 					return new Response(JSON.stringify({ error: 'Code is required' }), {
 						status: 400,
@@ -219,11 +180,10 @@ export default {
 					});
 				}
 
-				// Perform direct code analysis
 				const analysisPrompt = `Please analyze this ${language || 'code'} for security, performance, and quality issues:\n\n\`\`\`${language || ''}\n${code}\n\`\`\``;
 				const analysisResult = await performCodeAnalysis(analysisPrompt, env);
-				
-				return new Response(JSON.stringify({ 
+
+				return new Response(JSON.stringify({
 					message: 'Analysis completed',
 					analysis: analysisResult
 				}), {
@@ -238,11 +198,10 @@ export default {
 			}
 		}
 
-
 		// Health check endpoint
 		if (url.pathname === '/health') {
-			return new Response(JSON.stringify({ 
-				status: 'healthy', 
+			return new Response(JSON.stringify({
+				status: 'healthy',
 				service: 'AI Code Quality Assistant',
 				version: '1.0.0',
 				timestamp: new Date().toISOString(),
@@ -253,7 +212,7 @@ export default {
 			});
 		}
 
-		return new Response('Not Found - AI Code Quality Assistant', { 
+		return new Response('Not Found - AI Code Quality Assistant', {
 			status: 404,
 			headers: { 'Access-Control-Allow-Origin': '*' }
 		});

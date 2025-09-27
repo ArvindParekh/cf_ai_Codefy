@@ -13,7 +13,6 @@ export interface AnalysisSession {
 
 /**
  * Durable Object for managing code quality analysis state
- * Stores analysis history, user sessions, and quality metrics over time
  */
 export class QualityAnalysisState extends DurableObject {
   private sessions: Map<string, AnalysisSession> = new Map();
@@ -36,9 +35,6 @@ export class QualityAnalysisState extends DurableObject {
     });
   }
 
-  /**
-   * Create or get a session for analysis tracking
-   */
   async getSession(sessionId: string, userId?: string): Promise<AnalysisSession> {
     let session = this.sessions.get(sessionId);
     
@@ -63,9 +59,6 @@ export class QualityAnalysisState extends DurableObject {
     return session;
   }
 
-  /**
-   * Save a new code analysis result
-   */
   async saveAnalysis(sessionId: string, analysis: CodeAnalysisResult): Promise<void> {
     try {
       if (!sessionId || !analysis) {
@@ -102,9 +95,6 @@ export class QualityAnalysisState extends DurableObject {
     }
   }
 
-  /**
-   * Get analysis history for a session
-   */
   async getAnalysisHistory(sessionId: string, limit: number = 10): Promise<CodeAnalysisResult[]> {
     try {
       if (!sessionId) {
@@ -130,9 +120,6 @@ export class QualityAnalysisState extends DurableObject {
     }
   }
 
-  /**
-   * Get session statistics
-   */
   async getSessionStats(sessionId: string): Promise<{
     totalAnalyses: number;
     averageScore: number;
@@ -177,9 +164,6 @@ export class QualityAnalysisState extends DurableObject {
     };
   }
 
-  /**
-   * Clean up old sessions (called periodically)
-   */
   async cleanupOldSessions(maxAgeMs: number = 7 * 24 * 60 * 60 * 1000): Promise<number> {
     const now = Date.now();
     let removedCount = 0;
@@ -198,9 +182,6 @@ export class QualityAnalysisState extends DurableObject {
     return removedCount;
   }
 
-  /**
-   * Handle HTTP requests to the Durable Object
-   */
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const sessionId = url.searchParams.get('sessionId') || 'default';
@@ -264,9 +245,6 @@ export class QualityAnalysisState extends DurableObject {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  /**
-   * Save state to persistent storage
-   */
   private async saveState(): Promise<void> {
     try {
       await this.ctx.storage.put("sessions", this.sessions);

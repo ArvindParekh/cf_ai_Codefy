@@ -50,9 +50,6 @@ export class SimpleCodeAgent extends AIChatAgent<Env> {
     });
   }
 
-  /**
-   * Use Workers AI for code analysis (Llama 3.3)
-   */
   private async analyzeWithWorkersAI(code: string, analysisType: string): Promise<string> {
     if (!code?.trim()) {
       throw new Error('Code input is required for analysis');
@@ -90,18 +87,13 @@ Respond in a clear, structured format that a developer can easily understand and
       return result;
     } catch (error) {
       console.error("Workers AI analysis error:", error);
-      
-      // Provide fallback analysis if Workers AI fails
       const fallbackAnalysis = this.getFallbackAnalysis(analysisType, error as Error);
       return fallbackAnalysis;
     }
   }
 
-  /**
-   * Provide a fallback analysis when Workers AI is unavailable
-   */
   private getFallbackAnalysis(analysisType: string, error: Error): string {
-    const fallbackMessage = `🔧 **Analysis Service Temporarily Unavailable**
+    return `🔧 **Analysis Service Temporarily Unavailable**
 
 I'm currently unable to connect to the AI analysis service. Here's what I can tell you about ${analysisType} analysis:
 
@@ -117,13 +109,8 @@ ${this.getAnalysisGuidelines(analysisType)}
 - If the issue persists, please contact support
 
 I'll be back to full functionality soon!`;
-
-    return fallbackMessage;
   }
 
-  /**
-   * Get basic analysis guidelines for different types
-   */
   private getAnalysisGuidelines(analysisType: string): string {
     switch (analysisType.toLowerCase()) {
       case 'security':
@@ -166,18 +153,14 @@ I'll be back to full functionality soon!`;
   async onChatMessage(onFinish: any) {
     return createTextStreamResponse({
       execute: async (dataStream) => {
-        // Get the last message
         const lastMessage = this.messages[this.messages.length - 1];
         const content = typeof lastMessage === 'string' ? lastMessage : lastMessage.content || '';
 
-        // Check if this is a code analysis request
         const isCodeAnalysisRequest = this.isCodeAnalysisRequest(content);
 
         if (isCodeAnalysisRequest) {
-          // Perform detailed code analysis
           await this.performCodeAnalysis(content, dataStream, onFinish);
         } else {
-          // Regular chat interaction
           await this.performRegularChat(dataStream, onFinish);
         }
       },
